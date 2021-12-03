@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  mongodb:
+    image: mongo:4.1
+    container_name: mongodb
+    restart: always
+    volumes:
+      - mongodata:/data/db:rw
+    networks:
+      - payment-gate_default
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.2
+    container_name: elasticsearch
+    restart: always
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data:rw
+    networks:
+      - payment-gate_default
+
+  graylog:
+    container_name: graylog
+    hostname: graylog
+    image: graylog/graylog:3.3
+  #  volumes:
+  #    - graylogdata:/usr/share/graylog/data
+    environment:
+      # CHANGE ME (must be at least 16 characters)!
+      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
+      # Password: admin
+      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
+    links:
+      - mongodb:mongo
+      - elasticsearch
+    depends_on:
+      - mongodb
+      - elasticsearch
+    ports:
+      # Graylog web interface and REST API
+      - 9000:9000
+      # Syslog TCP
+      - 1514:1514
+      # Syslog UDP
+      - 1514:1514/udp
+      # GELF TCP
+      - 12201:12201
+      # GELF UDP
+      - 12201:12201/udp
+    networks:
+      - payment-gate_default
+
+volumes:
+  esdata1:
+    driver: local
+  mongodata:
+    driver: local
+#  graylogdata:
+#    driver: local
+
+networks:
+  payment-gate_default:
+    external: true

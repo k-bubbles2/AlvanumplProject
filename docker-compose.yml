@@ -1,0 +1,16 @@
+version: '3.3'
+services:
+  fpm:
+    build:
+      context: .
+    volumes:
+      - ./:/var/www
+      - ./logs:/var/www/logs
+      - ./docker/config/local/fpm/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+    environment:
+      APP_DIR: ${APP_DIR}
+    ports:
+      - "9002:9002"
+      - "8080:8080"
+      - "8081:8081"
+

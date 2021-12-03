@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.21.0
+    container_name: prometheus
+    hostname: prometheus
+    ports:
+      - 9090:9090
+    volumes:
+      - prometheus-data:/prometheus
+      - ./prometheus:/config
+    networks:
+      - payment-gate_default
+    command: --web.enable-lifecycle  --config.file=/config/prometheus.yml
+  grafana:
+    image: grafana/grafana:6.7.2
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+    networks:
+      - payment-gate_default
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana_data:
+    driver: local
+networks:
+  payment-gate_default:
+    external: true
+

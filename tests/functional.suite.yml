@@ -1,0 +1,18 @@
+# Codeception Test Suite Configuration
+#
+# Suite for functional tests.
+
+class_name: FunctionalTester
+modules:
+  enabled:
+    - Asserts
+    - \Helper\Functional
+    - Cli: ~
+    - REST:
+        url: %API_URL%
+        depends: PhpBrowser
+        part: Json
+    - PhpBrowser:
+        url: %API_URL% # repeats the URL from the REST module; not needed if you don't have further settings like below
+        headers:
+          Content-Type: application/json
