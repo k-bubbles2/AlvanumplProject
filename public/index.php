@@ -45,7 +45,7 @@ $app->post('/search', function (Request $request, Response $response, array $arg
 
     $response->getBody()->write(json_encode($result));
 
-    return $response;
+    return $response->withHeader('Content-Type', 'application/json');
 });
 
 $app->run();
